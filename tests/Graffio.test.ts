@@ -10,8 +10,8 @@ describe("Graffio", () => {
   describe("addNode", () => {
     it("should add a node correctly", () => {
       const id = graffio.addNode({ label: "test", value: 1 });
-      expect(graffio.nodes.has(id)).toBeTruthy();
-      expect(graffio.nodes.get(id)).toEqual({
+      expect(graffio.hasNode(id)).toBeTruthy();
+      expect(graffio.getNode(id)).toEqual({
         id: id,
         label: "test",
         value: 1,
@@ -26,8 +26,8 @@ describe("Graffio", () => {
 
       graffio.addEdge(id1, id2, { label: "connects" });
 
-      expect(graffio.readOutNeighbours(id1)).toHaveLength(1);
-      expect(graffio.readInNeighbours(id2)).toHaveLength(1);
+      expect(graffio.readOutEdges(id1)).toHaveLength(1);
+      expect(graffio.readInEdges(id2)).toHaveLength(1);
     });
 
     it("should throw an error if nodes do not exist", () => {

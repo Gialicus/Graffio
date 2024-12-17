@@ -1,21 +1,28 @@
 import { CreateEdg3Input, Edg3 } from "./Edg3";
+import {
+  Edg3MemoryStore,
+  Edg3Store,
+  InnerEdg3MemoryStore,
+  InnerEdg3Store,
+} from "./Edg3Store";
 import { CreateNod3Input, generateId, Nod3, Nod3Id } from "./Nod3";
+import { Nod3MemoryStore, Nod3Store } from "./Nod3Store";
 
 export class Graffio<T = unknown, K = unknown> {
-  nodes: Map<Nod3Id, Nod3<T>> = new Map();
-  inEdges: Map<Nod3Id, Map<Nod3Id, Edg3<K>>> = new Map();
-  outEdges: Map<Nod3Id, Map<Nod3Id, Edg3<K>>> = new Map();
+  nodeStore: Nod3Store<T> = new Nod3MemoryStore();
+  inEdges: Edg3Store<K> = new Edg3MemoryStore();
+  outEdges: Edg3Store<K> = new Edg3MemoryStore();
 
   addNode(node: CreateNod3Input<T>): string {
     const id = generateId();
-    this.nodes.set(id, { id: id, ...node });
-    this.inEdges.set(id, new Map());
-    this.outEdges.set(id, new Map());
+    this.nodeStore.set(id, { id: id, ...node });
+    this.inEdges.set(id, new InnerEdg3MemoryStore());
+    this.outEdges.set(id, new InnerEdg3MemoryStore());
     return id;
   }
 
   addEdge(from: Nod3Id, to: Nod3Id, data: CreateEdg3Input<K>) {
-    if (!this.nodes.has(from) || !this.nodes.has(to)) {
+    if (!this.nodeStore.has(from) || !this.nodeStore.has(to)) {
       throw new Error(`Nodes from: ${from} or to: ${to} not exist`);
     }
     this.inEdges.get(to)!.set(from, { in: from, out: to, ...data });
@@ -24,17 +31,17 @@ export class Graffio<T = unknown, K = unknown> {
   }
 
   print(): void {
-    for (const node of this.nodes.values()) {
+    for (const node of this.nodeStore.values()) {
       console.log("-".repeat(72));
       console.log(`(${node.label}:${node.id})\n`);
       for (const ins of this.inEdges.get(node.id)!.values()) {
-        const inNode = this.nodes.get(ins.in)!;
+        const inNode = this.nodeStore.get(ins.in)!;
         console.log(
           `\t(${node.label}:${node.id}) <- ${ins.label} -- (${inNode.label}:${inNode.id})`
         );
       }
       for (const out of this.outEdges.get(node.id)!.values()) {
-        const outNode = this.nodes.get(out.out)!;
+        const outNode = this.nodeStore.get(out.out)!;
         console.log(
           `\t(${node.label}:${node.id}) -- ${out.label} -> (${outNode.label}:${outNode.id})`
         );

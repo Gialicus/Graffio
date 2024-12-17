@@ -1,3 +1,4 @@
+import { InnerEdg3MemoryStore } from "../src/Edg3Store";
 import { Graffio } from "../src/Graffio";
 
 describe("Graffio", () => {
@@ -10,18 +11,18 @@ describe("Graffio", () => {
   describe("addNode", () => {
     it("should add a node correctly", () => {
       const id = graffio.addNode({ label: "test", value: 1 });
-      expect(graffio.nodes.has(id)).toBeTruthy();
-      expect(graffio.nodes.get(id)).toEqual({
+      expect(graffio.nodeStore.has(id)).toBeTruthy();
+      expect(graffio.nodeStore.get(id)).toEqual({
         id: id,
         label: "test",
         value: 1,
       });
     });
 
-    it("should initialize edge maps", () => {
+    it("should initialize edge store istance", () => {
       const id = graffio.addNode({ label: "test", value: 1 });
-      expect(graffio.inEdges.get(id)).toBeInstanceOf(Map);
-      expect(graffio.outEdges.get(id)).toBeInstanceOf(Map);
+      expect(graffio.inEdges.get(id)).toBeInstanceOf(InnerEdg3MemoryStore);
+      expect(graffio.outEdges.get(id)).toBeInstanceOf(InnerEdg3MemoryStore);
     });
   });
 

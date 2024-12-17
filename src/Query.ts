@@ -7,7 +7,7 @@ export class Query<T = unknown, K = unknown> {
   constructor(private graffio: Graffio<T, K>) {}
 
   byId(id: Nod3Id) {
-    if (!this.graffio.nodes.has(id)) {
+    if (!this.graffio.nodeStore.has(id)) {
       throw new Error("Node doesnt exists");
     }
     this.currentNodes.add(id);
@@ -15,7 +15,7 @@ export class Query<T = unknown, K = unknown> {
   }
 
   byLabel(label: string) {
-    for (const node of this.graffio.nodes.values()) {
+    for (const node of this.graffio.nodeStore.values()) {
       if (node.label !== label) continue;
       this.byId(node.id);
     }
@@ -23,7 +23,7 @@ export class Query<T = unknown, K = unknown> {
   }
 
   whereNodes(predicate: (node: Nod3<T>) => boolean) {
-    for (const node of this.graffio.nodes.values()) {
+    for (const node of this.graffio.nodeStore.values()) {
       if (predicate(node)) {
         this.byId(node.id);
       }
@@ -80,7 +80,7 @@ export class Query<T = unknown, K = unknown> {
   filter(predicate: (node: Nod3<T>) => boolean): this {
     const filteredNodes = new Set<string>();
     for (const node of this.currentNodes) {
-      const currentNode = this.graffio.nodes.get(node);
+      const currentNode = this.graffio.nodeStore.get(node);
       if (currentNode && predicate(currentNode)) {
         filteredNodes.add(node);
       }
@@ -90,22 +90,22 @@ export class Query<T = unknown, K = unknown> {
   }
 
   countNodes(): number {
-    return this.graffio.nodes.size;
+    return this.graffio.nodeStore.size();
   }
 
   countEdges(): number {
     let count = 0;
     for (const edges of this.graffio.inEdges.values()) {
-      count += edges.size;
+      count += edges.size();
     }
     for (const edges of this.graffio.outEdges.values()) {
-      count += edges.size;
+      count += edges.size();
     }
     return count;
   }
 
   hasNode(nodeId: string): boolean {
-    return this.graffio.nodes.has(nodeId);
+    return this.graffio.nodeStore.has(nodeId);
   }
 
   hasInEdge(source: string, target: string): boolean {
@@ -124,7 +124,7 @@ export class Query<T = unknown, K = unknown> {
 
   toList(): Nod3<T>[] {
     return Array.from(this.currentNodes).map(
-      (id) => this.graffio.nodes.get(id)!
+      (id) => this.graffio.nodeStore.get(id)!
     );
   }
 
